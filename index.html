@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#080d18"><title>TRONS CITY: Reborn</title>
+<meta name="theme-color" content="#080d18"><meta name="description" content="TRONS CITY: REBORN — aventura de acção e plataformas 2D."><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><title>TRONS CITY: Reborn</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d18;color:#eaf4ff;font-family:system-ui;touch-action:none}
 canvas{display:block;width:100vw;height:100vh;image-rendering:auto}
@@ -147,4 +147,4 @@ addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))held.L=fal
 document.getElementById('pause').onclick=()=>{paused=!paused;say(paused?'JOGO PAUSADO':'CONTINUA!')};
 document.getElementById('start').onclick=()=>{document.getElementById('overlay').style.display='none';started=true;prev=performance.now();say('A Lâmina Astral despertou. Avança!')};
 })();
-</script></body></html>
+</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script></body></html>
