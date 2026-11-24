@@ -1,0 +1,20 @@
+TRONS CITY — ECOS DA ESCURIDÃO
+Protótipo jogável de plataformas 2D, num único ficheiro HTML.
+
+COMO TESTAR:
+- Abra index.html num navegador moderno (Chrome/Firefox).
+- No Android, mantenha o telemóvel na horizontal.
+- Toque em COMEÇAR A AVENTURA.
+- Botões inferiores: esquerda/direita, ataque e salto.
+- No computador: A/D ou setas, Espaço para saltar e X para atacar.
+
+PUBLICAR NO GITHUB:
+1. No repositório trons-city, abra index.html.
+2. Toque no lápis (Edit) e substitua todo o conteúdo pelo conteúdo do novo index.html.
+   Alternativamente, remova o index.html antigo e carregue este novo.
+3. Faça Commit changes.
+4. Em Settings > Pages confirme main e /(root).
+5. Aguarde a publicação e abra o endereço GitHub Pages.
+
+Nota honesta: é um capítulo/protótipo jogável original, não um jogo comercial completo.
+Os gráficos são desenhados em Canvas por código; música, vozes, fases adicionais e arte final dedicada podem ser acrescentadas em versões futuras.
