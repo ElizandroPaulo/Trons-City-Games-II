@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080d18"><title>TRONS CITY: Reborn</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d18;color:#eaf4ff;font-family:system-ui;touch-action:none}
+canvas{display:block;width:100vw;height:100vh;image-rendering:auto}
+#ui{position:fixed;inset:0;pointer-events:none}
+.brand{position:absolute;left:12px;top:10px;font-size:12px;letter-spacing:3px;font-weight:900;color:#bfeaff;text-shadow:0 0 12px #48b8e8}
+.hud{position:absolute;top:12px;right:12px;width:175px;padding:9px 11px;border:1px solid #8cb8db66;border-radius:12px;background:#091426c9;backdrop-filter:blur(5px);font-size:10px;letter-spacing:1px}
+.bar{height:8px;border-radius:8px;background:#26344a;margin:4px 0 7px;overflow:hidden}.fill{height:100%;width:100%;background:linear-gradient(90deg,#db4d72,#ff9b9f)}
+#bossHud{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:min(360px,55vw);display:none;text-align:center;font-size:10px;letter-spacing:2px;color:#ffced8;text-shadow:0 1px 4px #000}
+#bossBar{height:9px;border:1px solid #e8a1b4;border-radius:8px;background:#24101d;overflow:hidden;margin-top:5px}#bossFill{height:100%;width:100%;background:linear-gradient(90deg,#a52d55,#ff7796)}
+#hint{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);font-size:11px;color:#c7d9eb;text-shadow:0 2px 6px #000;text-align:center}
+.controls{position:absolute;bottom:17px;display:flex;gap:9px;pointer-events:auto;align-items:end}
+#move{left:14px}#act{right:14px}
+button.ctrl{width:55px;height:55px;border-radius:50%;border:1px solid #a9d8fa88;background:linear-gradient(145deg,#324b70eF,#0b1830f5);color:white;font-size:21px;font-weight:900;box-shadow:0 5px 18px #0009;touch-action:none}
+button.ctrl:active{transform:scale(.92);filter:brightness(1.5)}
+#slash{background:linear-gradient(145deg,#b34b70,#4d1c38);width:65px;height:65px}#jump{background:linear-gradient(145deg,#378eb9,#153a63);width:62px;height:62px}
+#dash{width:48px;height:48px;font-size:16px}
+#pause{position:absolute;right:12px;top:58px;pointer-events:auto;border:1px solid #9ab9d866;border-radius:9px;background:#10213a;color:#fff;padding:7px 11px}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse,#101f37eF,#050914f5);padding:18px}
+.card{width:min(540px,96vw);padding:25px;border-radius:20px;background:linear-gradient(145deg,#1a2d4a,#091326);border:1px solid #9bc9e477;box-shadow:0 20px 80px #000d}
+.kicker{font-size:10px;letter-spacing:4px;color:#80d6f1;font-weight:800}h1{font-size:clamp(30px,7vw,48px);letter-spacing:4px;margin:8px 0;color:#e3f5ff;text-shadow:0 0 25px #48bde7}
+p{font-size:14px;line-height:1.55;color:#c9d9ec}.primary{width:100%;border:0;border-radius:12px;padding:14px;background:linear-gradient(90deg,#2696bf,#6867bd);color:#fff;font-weight:900;font-size:15px;margin-top:10px}
+.small{font-size:11px;color:#8fa7c3;text-align:center;margin-top:12px}
+@media(orientation:portrait){#hint{bottom:19%}.controls{bottom:12px}.hud{width:145px}.brand{font-size:10px}}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="ui">
+ <div class="brand">TRONS CITY <span style="color:#6cd3ed"> / REBORN</span></div>
+ <div class="hud">VITALIDADE<div class="bar"><div id="hp" class="fill"></div></div>FOCO<div class="bar"><div id="mp" class="fill" style="background:linear-gradient(90deg,#328bc9,#8ceaff)"></div></div><div>✧ Fragmentos: <b id="souls">0</b>　⚔ <b id="kills">0</b></div></div>
+ <div id="bossHud">GUARDIÃO DO VÉU<div id="bossBar"><div id="bossFill"></div></div></div>
+ <div id="hint">Explora as ruínas. Procura a luz azul.</div>
+ <button id="pause">Ⅱ</button>
+ <div class="controls" id="move"><button class="ctrl" id="L">◀</button><button class="ctrl" id="R">▶</button></div>
+ <div class="controls" id="act"><button class="ctrl" id="dash">DASH</button><button class="ctrl" id="jump">↑</button><button class="ctrl" id="slash">⚔</button></div>
+</div>
+<div id="overlay" class="overlay"><div class="card"><div class="kicker">UMA AVENTURA METROIDVANIA ORIGINAL</div><h1>TRONS CITY</h1><div style="letter-spacing:5px;color:#8adcf4;font-weight:900">REBORN</div><p>O Véu devorou as estrelas e transformou os guardiões em monstros. Como Kael, o último portador da Lâmina Astral, atravessa três regiões esquecidas, derrota os seus guardiões e descobre o que aconteceu à cidade.</p><p><b>Controlos:</b> ◀ ▶ mover · ↑ saltar · ⚔ atacar · DASH esquivar. No computador: A/D ou setas, Espaço, J e Shift.</p><button id="start" class="primary">INICIAR JORNADA</button><div class="small">Versão jogável experimental • Capítulo I • feito para navegador Android</div></div></div>
+<script>
+(()=>{
+const c=document.getElementById('c'),g=c.getContext('2d');let W,H,D=1;
+function size(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,1.7);c.width=W*D;c.height=H*D;g.setTransform(D,0,0,D,0,0)}addEventListener('resize',size);size();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rand=(a,b)=>a+Math.random()*(b-a);
+let floor=H*.78,cam=0,started=false,paused=false,prev=0,world=0,frags=0,kills=0,shake=0,notice=0;
+const hero={x:100,y:floor-58,w:34,h:58,vx:0,vy:0,face:1,on:false,run:0,state:'idle',attack:0,attackCD:0,dash:0,inv:0,hp:100,focus:100};
+let held={L:false,R:false},plats=[],mobs=[],particles=[],orbs=[],boss=null,gateX=0;
+function makeLevel(){
+ floor=H*.78;let offset=world*3600;
+ plats=[{x:0,y:floor,w:640},{x:700,y:floor,w:510},{x:1270,y:floor,w:540},{x:1880,y:floor,w:520},{x:2470,y:floor,w:500},{x:3040,y:floor,w:650},{x:3740,y:floor,w:550}];
+ [[350,floor-100,150],[800,floor-145,130],[1050,floor-85,100],[1450,floor-120,170],[1710,floor-205,130],[2070,floor-105,130],[2310,floor-165,130],[2660,floor-120,140],[2900,floor-195,130],[3260,floor-135,160],[3510,floor-200,130],[3890,floor-130,150]].forEach(a=>plats.push({x:a[0],y:a[1],w:a[2]}));
+ mobs=[{x:540,y:floor-40,min:480,max:610,hp:3,type:0},{x:960,y:floor-40,min:870,max:1110,hp:3,type:1},{x:1530,y:floor-40,min:1450,max:1660,hp:4,type:0},{x:2140,y:floor-40,min:2030,max:2270,hp:4,type:1},{x:2790,y:floor-40,min:2660,max:2920,hp:5,type:0},{x:3370,y:floor-40,min:3260,max:3480,hp:5,type:1}].map((m,i)=>({...m,alive:true,maxhp:m.hp,v:65+i*7,phase:i}));
+ orbs=[];for(let x=220;x<4200;x+=170)orbs.push({x,y:floor-55-(x%4)*17,got:false,phase:rand(0,6)});
+ boss={x:4120,y:floor-110,w:82,h:110,hp:100,maxhp:100,phase:0,t:0,alive:true,hit:0};
+ gateX=4360;
+}
+makeLevel();hero.y=floor-58;
+function burst(x,y,color,n=12){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-180,180),vy:rand(-240,80),life:rand(.25,.7),max:.7,color,r:rand(2,5)})}
+function say(s){let h=document.getElementById('hint');h.textContent=s;notice=2.2}
+function bg(){
+ let sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,['#091528','#17132b','#111c2d'][world]);sky.addColorStop(.6,'#26364c');sky.addColorStop(1,'#101a2a');g.fillStyle=sky;g.fillRect(0,0,W,H);
+ // stars and atmospheric glow
+ for(let i=0;i<90;i++){let x=((i*137-cam*.12)%(W+30)+W+30)%(W+30),y=(i*71)%Math.floor(H*.58);g.fillStyle=i%7?'#9bc9e8':'#e4d8b5';g.globalAlpha=.2+(i%4)*.12;g.fillRect(x,y,2,2)}g.globalAlpha=1;
+ let glow=g.createRadialGradient(W*.72,H*.3,4,W*.72,H*.3,W*.55);glow.addColorStop(0,['#4b9cbd44','#a35a7844','#7b9a9b44'][world]);glow.addColorStop(1,'transparent');g.fillStyle=glow;g.fillRect(0,0,W,H);
+ // layered cliffs
+ for(let l=0;l<3;l++){g.beginPath();g.moveTo(0,H*.69);for(let x=0;x<=W+40;x+=40){let y=H*(.48+l*.07)+Math.sin((x+cam*(.10+l*.09))*.008+l)*35+Math.sin(x*.022)*12;g.lineTo(x,y)}g.lineTo(W,H);g.lineTo(0,H);g.closePath();g.fillStyle=[['#142b43','#1b354a','#263e4d'],['#251b35','#34243f','#42304b'],['#142c37','#1b4147','#2b5550']][world][l];g.fill()}
+ // distant spires
+ for(let i=0;i<17;i++){let x=((i*210-cam*.25)%(W+240)+W+240)%(W+240)-50,h=70+(i*43)%140;g.fillStyle='#0a1728aa';g.fillRect(x,H*.65-h,45,h);g.fillStyle='#8adcf055';for(let y=H*.65-h+15;y<H*.65-10;y+=23)g.fillRect(x+12,y,4,7)}
+}
+function terrain(){
+ g.save();g.translate(-cam,0);
+ plats.forEach((p,i)=>{let grd=g.createLinearGradient(0,p.y,0,p.y+90);grd.addColorStop(0,['#405b68','#5b465f','#365d59'][world]);grd.addColorStop(1,'#142335');g.fillStyle=grd;g.beginPath();g.roundRect(p.x,p.y,p.w,260,5);g.fill();g.fillStyle=['#9ac4a5','#c28b9e','#86c5ae'][world];g.fillRect(p.x,p.y,p.w,5);
+ for(let x=p.x+8;x<p.x+p.w;x+=29){g.fillStyle='#09172566';g.fillRect(x,p.y+16+(x%3)*8,rand(5,15),3);g.strokeStyle='#92c8b077';g.beginPath();g.moveTo(x,p.y);g.lineTo(x-4,p.y-7-(x%4)*2);g.stroke()}
+ });
+ // ruins pillars, hanging vines, lanterns
+ for(let x=170;x<4400;x+=420){g.fillStyle='#172b40';g.fillRect(x,floor-145,24,145);g.fillRect(x-10,floor-150,44,10);g.strokeStyle='#6bb9a4';g.lineWidth=3;g.beginPath();g.moveTo(x+28,floor-145);g.quadraticCurveTo(x+55,floor-95,x+42,floor-70);g.stroke();g.fillStyle='#9ceaff';g.shadowColor='#7beaff';g.shadowBlur=15;g.beginPath();g.arc(x+12,floor-165,5,0,7);g.fill();g.shadowBlur=0}
+ // floating pickups
+ orbs.forEach(o=>{if(o.got)return;let y=o.y+Math.sin(performance.now()*.002+o.phase)*7;g.save();g.translate(o.x,y);g.rotate(Math.PI/4);g.shadowColor='#74efff';g.shadowBlur=20;g.fillStyle='#8ef4ff';g.fillRect(-7,-7,14,14);g.fillStyle='#fff';g.fillRect(-3,-3,6,6);g.restore()});
+ // enemies
+ mobs.forEach(m=>{if(!m.alive)return;drawMob(m)});
+ if(boss.alive)drawBoss();
+ drawHero();g.restore();
+}
+function drawHero(){
+ let p=hero,x=p.x,y=p.y,run=Math.abs(p.vx)>.1&&p.on,step=Math.sin(p.run)*6;
+ // contact shadow
+ g.globalAlpha=.25;g.fillStyle='#000';g.beginPath();g.ellipse(x+17,floor+3,20,5,0,0,7);g.fill();g.globalAlpha=1;
+ // cape animated
+ g.fillStyle='#172c51';g.beginPath();g.moveTo(x+11,y+17);g.quadraticCurveTo(x-12-p.vx*.025,y+28+Math.sin(p.run)*5,x-5,y+52);g.lineTo(x+20,y+43);g.closePath();g.fill();
+ // legs with running cycle
+ let lift=run?Math.abs(step):0;g.fillStyle='#17253c';g.beginPath();g.roundRect(x+7,y+39+(run?Math.max(0,step):0),9,18,4);g.fill();g.beginPath();g.roundRect(x+20,y+39+(run?Math.max(0,-step):0),9,18,4);g.fill();
+ // boots
+ g.fillStyle='#8db7c5';g.fillRect(x+5,y+53+(run?Math.max(0,step):0),12,4);g.fillRect(x+19,y+53+(run?Math.max(0,-step):0),12,4);
+ // body, shoulder, head
+ g.fillStyle='#d5b68a';g.beginPath();g.roundRect(x+5,y+17,25,27,7);g.fill();g.fillStyle='#315f7c';g.beginPath();g.roundRect(x+9,y+21,17,21,5);g.fill();
+ g.fillStyle='#d9a987';g.beginPath();g.roundRect(x+7,y,22,23,8);g.fill();g.fillStyle='#1a263d';g.beginPath();g.roundRect(x+5,y-4,26,12,7);g.fill();
+ g.fillStyle='#b9f6ff';g.fillRect(p.face===1?23:9,y+9,4,3);
+ // sword on idle / slash
+ if(p.attack>0){let prog=1-p.attack/.34,ang=(-1.5+prog*3.0)*p.face;g.save();g.translate(x+17,y+29);g.rotate(ang);g.shadowColor='#8df5ff';g.shadowBlur=22;g.fillStyle='#d9fbff';g.beginPath();g.moveTo(10,-4);g.lineTo(54,-2);g.lineTo(10,4);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#e0b76f';g.fillRect(5,-7,5,14);g.restore();g.strokeStyle='#8df5ff88';g.lineWidth=4;g.beginPath();g.arc(x+17+p.face*25,y+30,30,-1.4,1.4);g.stroke()}
+ else{g.save();g.translate(x+(p.face===1?27:7),y+35);g.rotate(p.face===1?-.55:.55);g.fillStyle='#c8f5ff';g.shadowColor='#68dfff';g.shadowBlur=12;g.beginPath();g.moveTo(0,-3);g.lineTo(29,-1);g.lineTo(0,3);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#d5ae72';g.fillRect(-2,-6,5,12);g.restore()}
+ if(p.inv>0&&Math.floor(performance.now()/70)%2===0){g.globalAlpha=.5;g.fillStyle='#fff';g.fillRect(x-3,y-4,40,65);g.globalAlpha=1}
+}
+function drawMob(m){let bob=Math.sin(performance.now()*.006+m.phase)*3;g.shadowColor='#f06b91';g.shadowBlur=13;g.fillStyle=m.type?'#8b5b83':'#a34d68';g.beginPath();g.roundRect(m.x-18,m.y+bob,36,38,12);g.fill();g.shadowBlur=0;g.fillStyle='#fff0d5';g.fillRect(m.x-10,m.y+11+bob,6,5);g.fillRect(m.x+5,m.y+11+bob,6,5);g.fillStyle='#341c35';g.fillRect(m.x-8,m.y+28+bob,17,4);if(m.hp<m.maxhp){g.fillStyle='#1a1724';g.fillRect(m.x-18,m.y-9,36,4);g.fillStyle='#ed668a';g.fillRect(m.x-18,m.y-9,36*m.hp/m.maxhp,4)}}
+function drawBoss(){let b=boss,bob=Math.sin(performance.now()*.004)*5;g.shadowColor='#fa668e';g.shadowBlur=25;g.fillStyle=b.hit>0?'#f5c4d2':'#593c68';g.beginPath();g.moveTo(b.x-40,b.y+100);g.lineTo(b.x-48,b.y+35+bob);g.lineTo(b.x-20,b.y+5+bob);g.lineTo(b.x,b.y-15+bob);g.lineTo(b.x+24,b.y+7+bob);g.lineTo(b.x+48,b.y+42+bob);g.lineTo(b.x+40,b.y+100);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#ffcfb5';g.fillRect(b.x-22,b.y+36+bob,10,6);g.fillRect(b.x+12,b.y+36+bob,10,6);g.strokeStyle='#bcefff';g.lineWidth=5;g.beginPath();g.moveTo(b.x-35,b.y+70);g.lineTo(b.x-58,b.y+108);g.moveTo(b.x+35,b.y+70);g.lineTo(b.x+58,b.y+108);g.stroke()}
+function hitHero(dmg,knock){if(hero.inv>0)return;hero.hp-=dmg;hero.inv=1.0;hero.vx=-hero.face*knock;hero.vy=-240;shake=10;burst(hero.x+16,hero.y+28,'#ff7d9c',9);say('Atingido! Encontra uma abertura para atacar.')}
+function update(dt){
+ if(!started||paused)return;let p=hero;dt=Math.min(dt,.033);p.inv=Math.max(0,p.inv-dt);p.attackCD=Math.max(0,p.attackCD-dt);p.attack=Math.max(0,p.attack-dt);p.dash=Math.max(0,p.dash-dt);
+ let d=(held.R?1:0)-(held.L?1:0);
+ if(p.dash>0){p.vx=p.face*560}else{p.vx=d*220;if(d)p.face=d}
+ p.x=clamp(p.x+p.vx*dt,0,4500);
+ let old=p.y;p.vy+=1500*dt;p.y+=p.vy*dt;p.on=false;
+ plats.forEach(pl=>{if(p.x+p.w>pl.x&&p.x<pl.x+pl.w&&old+p.h<=pl.y+6&&p.y+p.h>=pl.y&&p.vy>=0){p.y=pl.y-p.h;p.vy=0;p.on=true}});
+ if(p.y>H+100){p.x=world===0?100:200;p.y=floor-100;p.vy=0;hitHero(18,120)}
+ if(p.on&&d)p.run+=dt*13;else p.run+=dt*3;
+ p.state=!p.on?'jump':d?'run':'idle';
+ mobs.forEach(m=>{if(!m.alive)return;m.x+=m.v*dt;if(m.x<m.min||m.x>m.max)m.v*=-1;let touch=p.x+p.w>m.x-15&&p.x<m.x+16&&p.y+p.h>m.y+5&&p.y<m.y+38;if(touch)hitHero(13,170);
+ if(p.attack>0&&Math.abs((p.x+17+p.face*39)-m.x)<43&&Math.abs(p.y-m.y)<55&&m.hp>0){m.hp-=dt*20;if(m.hp<=0){m.alive=false;kills++;frags++;burst(m.x,m.y,'#ff83a6',20)}}
+ });
+ orbs.forEach(o=>{if(!o.got&&Math.abs(p.x+17-o.x)<22&&Math.abs(p.y+28-o.y)<42){o.got=true;frags++;p.focus=clamp(p.focus+9,0,100);burst(o.x,o.y,'#8ff5ff',10)}});
+ if(boss.alive){let b=boss;b.t+=dt;b.hit=Math.max(0,b.hit-dt);let dist=p.x-b.x;
+ if(Math.abs(dist)<420){document.getElementById('bossHud').style.display='block';document.getElementById('bossFill').style.width=(b.hp/b.maxhp*100)+'%';
+ if(b.phase===0&&Math.abs(dist)>115){b.x+=Math.sign(dist)*85*dt}
+ if(b.phase===0&&Math.abs(dist)<135&&b.t>1.3){b.phase=1;b.t=0}
+ if(b.phase===1&&b.t>.7){if(Math.abs(dist)<150)hitHero(20,250);b.phase=2;b.t=0}
+ if(b.phase===2&&b.t>1.0){b.phase=0;b.t=0}
+ if(p.attack>0&&Math.abs(dist)<100&&Math.abs(p.y-b.y)<125&&b.hit===0){b.hp-=2.2;b.hit=.22;shake=6;burst(b.x,b.y+45,'#a5f5ff',8);if(b.hp<=0){b.alive=false;kills++;frags+=10;document.getElementById('bossHud').style.display='none';say('GUARDIÃO DERROTADO! O caminho abriu-se.');burst(b.x,b.y,'#9af5ff',45)}}
+ }else document.getElementById('bossHud').style.display='none';
+ }
+ if(p.x>gateX&&!boss.alive){world=(world+1)%3;makeLevel();p.x=100;p.y=floor-58;p.hp=clamp(p.hp+25,0,100);say(['Região II: Catedral das Cinzas','Região III: Jardim Afogado','Região I: Bosque do Véu'][world])}
+ if(p.hp<=0){p.hp=100;p.x=100;p.y=floor-58;p.vy=0;say('A chama protegeu-te. Tenta outra vez.')}
+ p.focus=clamp(p.focus+.6*dt,0,100);cam=clamp(p.x-W*.38,0,4500-W);
+ particles.forEach(a=>{a.x+=a.vx*dt;a.y+=a.vy*dt;a.vy+=480*dt;a.life-=dt});particles=particles.filter(a=>a.life>0);
+ if(notice>0){notice-=dt;if(notice<=0)document.getElementById('hint').textContent='Explora as ruínas. Procura a luz azul.'}
+ document.getElementById('hp').style.width=clamp(p.hp,0,100)+'%';document.getElementById('mp').style.width=p.focus+'%';document.getElementById('souls').textContent=frags;document.getElementById('kills').textContent=kills;
+}
+function render(){g.save();if(shake>0){g.translate(rand(-shake,shake),rand(-shake,shake));shake*=.82}bg();terrain();g.save();g.translate(-cam,0);particles.forEach(a=>{g.globalAlpha=clamp(a.life/a.max,0,1);g.fillStyle=a.color;g.beginPath();g.arc(a.x,a.y,a.r,0,7);g.fill()});g.globalAlpha=1;g.restore();g.restore()}
+function loop(t){let dt=(t-prev)/1000||0;prev=t;update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function jump(){if(started&&!paused&&hero.on){hero.vy=-600;hero.on=false;burst(hero.x+16,hero.y+55,'#9cdff0',5)}}
+function slash(){if(started&&!paused&&hero.attackCD<=0){hero.attack=.34;hero.attackCD=.38;hero.focus=clamp(hero.focus-2,0,100)}}
+function dash(){if(started&&!paused&&hero.focus>=18){hero.focus-=18;hero.dash=.17;hero.inv=Math.max(hero.inv,.25);burst(hero.x+16,hero.y+30,'#8ceaff',8)}}
+function bind(id,k){let e=document.getElementById(id);e.addEventListener('pointerdown',ev=>{ev.preventDefault();held[k]=true;e.setPointerCapture(ev.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(n=>e.addEventListener(n,()=>held[k]=false))}
+bind('L','L');bind('R','R');
+document.getElementById('jump').onpointerdown=e=>{e.preventDefault();jump()};document.getElementById('slash').onpointerdown=e=>{e.preventDefault();slash()};document.getElementById('dash').onpointerdown=e=>{e.preventDefault();dash()};
+addEventListener('keydown',e=>{if(['ArrowLeft','a','A'].includes(e.key))held.L=true;if(['ArrowRight','d','D'].includes(e.key))held.R=true;if(e.key===' '||e.key==='ArrowUp')jump();if(e.key==='j'||e.key==='J')slash();if(e.key==='Shift')dash()});
+addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))held.L=false;if(['ArrowRight','d','D'].includes(e.key))held.R=false});
+document.getElementById('pause').onclick=()=>{paused=!paused;say(paused?'JOGO PAUSADO':'CONTINUA!')};
+document.getElementById('start').onclick=()=>{document.getElementById('overlay').style.display='none';started=true;prev=performance.now();say('A Lâmina Astral despertou. Avança!')};
+})();
+</script></body></html>
